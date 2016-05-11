@@ -1,0 +1,166 @@
+{layout="_static-pages/.layout_static_index"}
+
+{layout:set name="browser_device"}{if "{exp:brofo:is_mobile}"=="yes"}{if "{exp:brofo:mobile_model}"=="ipad"}desktop{if:else}mobile{/if}{if:else}desktop{/if}{/layout:set}
+
+{!--
+===========================================
+@DESC: Processes page requests from the Page Module
+===========================================
+--} {!-- // --}
+
+{layout:set name="set_the_table"}
+
+{exp:ce_cache:escape}{data-set-www-page-default}{/exp:ce_cache:escape} {!-- Snippet tag calling page data --}
+{if segment_2=="campuses"} {!-- Campus Pages --}
+	{exp:ce_cache:escape}{data-set-kso-articles-by-category}{/exp:ce_cache:escape} {!-- Imua Articles --}
+	{if segment_3=="maui_campus"} {!-- Set KS Maui data --}
+		{exp:ce_cache:escape}
+		{data-set-kso-article-ksm-list-limit-25} {!-- KSM Articles --}
+		{data-set-kso-snapshots-ksm-limit-50} {!-- KSM Photo Galleries --}
+		{data-set-www-page-daily-bulletin} {!-- Daily Bulletins --}
+		{/exp:ce_cache:escape}
+	{if:elseif segment_3=="hawaii_campus_stage"} {!-- Set KS Hawaii data --}
+
+	{if:else}
+		{exp:ce_cache:escape}
+		{data-set-www-page-daily-bulletin} {!-- Daily Bulletins --}
+		{data-set-kso-snapshots-25-limit} {!-- Imua Snapshots/Photo Galleries --}
+		{/exp:ce_cache:escape}
+	{/if}
+{/if}
+
+{!-- Combine both Imua and KSM articles and photo galleries --}
+{if (segment_3=="maui_campus") && segment_4==""} {!-- ON LAUNCH: Edit line to remove stage --}
+	{!-- Require Stash Lists: "ksm-article-list" & "kso-article-list" --}
+	{exp:stash:join_lists name="ksmaui_imua_article_list" lists="ksm-article-list,kso-article-list"}
+	{!-- Require Stash Lists: "ksm_snapshots_list" & "kso-snapshots-list" --}
+	{exp:stash:join_lists name="ksmaui_imua_snapshot_list" lists="ksm_snapshots_list,kso_snapshots_list"}
+{/if}
+
+{embed="_data/.page-set-meta-data"}
+
+{/layout:set}
+
+{if "{exp:brofo:is_mobile}"=="yes" && "{exp:brofo:mobile_model}"!="ipad"} {!-- start browser detect --}
+
+	{layout:set name="mobile_contents_static_pages"}
+
+	{data-set-www-page-default} {!-- Snippet tag calling page data --}
+{if segment_2=="campuses"} {!-- Campus Pages --}
+	{data-set-kso-articles-by-category} {!-- Imua Articles --}
+	{if segment_3=="maui_campus"} {!-- Set KS Maui data --}
+
+		{data-set-kso-article-ksm-list-limit-25} {!-- KSM Articles --}
+		{data-set-kso-snapshots-ksm-limit-50} {!-- KSM Photo Galleries --}
+		{data-set-www-page-daily-bulletin} {!-- Daily Bulletins --}
+
+	{if:elseif segment_3=="hawaii_campus_stage"} {!-- Set KS Hawaii data --}
+
+	{if:else}
+
+		{data-set-www-page-daily-bulletin} {!-- Daily Bulletins --}
+		{data-set-kso-snapshots-25-limit} {!-- Imua Snapshots/Photo Galleries --}
+
+	{/if}
+{/if}
+
+{!-- Combine both Imua and KSM articles and photo galleries --}
+{if (segment_3=="maui_campus") && segment_4==""} {!-- ON LAUNCH: Edit line to remove stage --}
+	{!-- Require Stash Lists: "ksm-article-list" & "kso-article-list" --}
+	{exp:stash:join_lists name="ksmaui_imua_article_list" lists="ksm-article-list,kso-article-list"}
+	{!-- Require Stash Lists: "ksm_snapshots_list" & "kso-snapshots-list" --}
+	{exp:stash:join_lists name="ksmaui_imua_snapshot_list" lists="ksm_snapshots_list,kso_snapshots_list"}
+{/if}
+
+{embed="_data/.page-set-meta-data"}
+
+	{exp:stash:get_list name="static_page_data"}
+		{!-- Stand alone pages NOT in Taxonomy --}
+		{if segment_1 =="terms_and_conditions" || segment_1 =="elm_photo_challenge" || segment_1 =="internships" || segment_1 =="stopforcedlandsales"}
+
+			{embed="_layouts_mobile/.pages_default_mobile"}
+			{!-- ###### 2 ######<br /> --}
+
+		{if:else} {!-- Get layouts for registered pages (in taxonomy) --}
+
+			{!-- ###### 2B ######<br /> --}
+			{exp:taxonomy:get_node tree_id="5" entry_id="{page-entry-id}"}
+			{!-- Display mobile navigation view if got children with segment exceptions listed below --}
+			{if "{this_node_has_children}"=="1" && "{this_hide}"!="1" &&
+				   (segment_2 !="publications_and_resources" &&
+					segment_2 !="about_kamehameha_schools" &&
+					segment_2 !="about_pauahi" &&
+					segment_2 !="find_a_job_at_ks" &&
+					segment_2 !="join_our_mailing_list" &&
+					last_segment !="lunch_menu")
+			}
+
+				{if segment_3=="maui_campus" && "{exp:secure_content:is_internal}"==FALSE} {!-- !!!!!! DEV NOTE: remove this line for KSMAUI Launch !!!!!! --}
+
+					{!-- ####### ONE #######<br /> --}
+
+					{embed="_layouts_mobile/.pages_campuses_mobile"}  {!-- !!!!!! DEV NOTE: remove this line for KSMAUI Launch !!!!!! --}
+
+				{if:else} {!-- !!!!!! DEV NOTE: remove this line for KSMAUI Launch !!!!!! --}
+
+					{!-- ####### TWO #######<br /> --}
+
+					{!-- GOT KIDS? - send user to sub navigation page --}
+					{embed="_layouts_mobile/.pages_subnav_mobile" entry_id="{page-entry-id}" up-level-node="{this_node_level+1}"} 3
+
+				{/if} {!-- !!!!!! DEV NOTE: remove this line for KSMAUI Launch !!!!!! --}
+
+			{if:else}
+				{!-- ###### 3 ######<br /> --}
+
+				{!-- No children pages - send user to content page --}
+				{if segment_2=="campuses"}
+					{!-- DEV NOTE: Insert Maui campus layout here for mobile --}
+					{if segment_3=="maui_campus" && segment_4!=""} {!-- DETECT: MAUI CAMPUS PAGES --}
+						{embed="_layouts_mobile/.pages_campuses_maui_mobile"}
+
+					{!-- ####### remove after launching new maui pages ####### --}
+					{if:elseif segment_3=="maui_campus_stage" && segment_4==""}
+
+						{embed="_layouts_mobile/.pages_campuses_maui_mobile"}
+
+					{if:elseif segment_3=="maui_campus" && segment_4==""}
+
+						{embed="_layouts_mobile/.pages_campuses_mobile"}
+					{!-- ##################################################### --}
+					{if:else}
+						{embed="_layouts_mobile/.pages_campuses_mobile"}
+					{/if}
+				{if:else}
+					{embed="_layouts_mobile/.pages_default_mobile"}
+				{/if}
+
+			{/if}
+			{/exp:taxonomy:get_node}
+		{!-- END layout includes --}
+		{/if}
+	{/exp:stash:get_list}
+	{/layout:set}
+
+{if:else}{!-- ################################## DESKTOP CODE ################################## --}
+
+	{layout:set name="static_pages_content"}
+	{exp:ce_cache:it:static_pages_content id="static_pages_content" global="no" seconds="1209600"}
+	{if segment_2=="campuses"}
+		{if segment_3=="maui_campus" && segment_4==""} {!-- DETECT: MAUI CAMPUS PAGES --}
+			{embed="_layouts/.pages_campuses_maui"}
+		{if:elseif segment_3=="maui_campus" && segment_4!=""} {!-- USE MAUI SPECIFIC TMPL FOR MAUI CAMPUS PAGES --}
+			{embed="_layouts/.pages_campuses_maui"}
+		{!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!! FOR STAGING ONLY - REMOVE WHEN LIVE :: BEGIN  !!!!!!!!!!!!!!!!!!!!!!!!!!!! --}
+		{if:elseif segment_3=="maui_campus_stage"}
+			{embed="_layouts/.pages_campuses_maui"}
+		{!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!! FOR STAGING ONLY - REMOVE WHEN LIVE :: END    !!!!!!!!!!!!!!!!!!!!!!!!!!!! --}
+		{if:else}
+			{embed="_layouts/.pages_campuses"} {!-- CE Cache in embed layout template --}
+		{/if}
+	{if:else}
+			{embed="_layouts/.pages_default"}
+	{/if}
+	{/exp:ce_cache:it:static_pages_content}
+	{/layout:set}
+{/if}
